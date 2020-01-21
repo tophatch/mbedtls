@@ -1518,6 +1518,10 @@ int mbedtls_x509_crt_parse_path( mbedtls_x509_crt *chain, const char *path )
 {
     int ret = 0;
 #if defined(_WIN32) && !defined(EFIX64) && !defined(EFI32)
+#if defined(_WIN32) && !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+#define lstrlenW (int)wcslen
+#endif
+
     int w_ret;
     WCHAR szDir[MAX_PATH];
     char filename[MAX_PATH];
