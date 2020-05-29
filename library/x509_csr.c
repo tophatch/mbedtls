@@ -528,6 +528,7 @@ void mbedtls_x509_csr_free( mbedtls_x509_csr *csr )
 {
     mbedtls_x509_name *name_cur;
     mbedtls_x509_name *name_prv;
+    mbedtls_x509_sequence *seq_cur, *seq_prv;
 
     if( csr == NULL )
         return;
@@ -537,6 +538,17 @@ void mbedtls_x509_csr_free( mbedtls_x509_csr *csr )
 #if defined(MBEDTLS_X509_RSASSA_PSS_SUPPORT)
     mbedtls_free( csr->sig_opts );
 #endif
+
+    seq_cur = csr->subject_alt_names.next;
+    while( seq_cur != NULL )
+    {
+        seq_prv = seq_cur;
+        seq_cur = seq_cur->next;
+        mbedtls_platform_zeroize( seq_prv,
+                                 sizeof( mbedtls_x509_sequence ) );
+        mbedtls_free( seq_prv );
+    }
+
 
     name_cur = csr->subject.next;
     while( name_cur != NULL )
