@@ -18,6 +18,9 @@
  *
  *  This file is part of mbed TLS (https://tls.mbed.org)
  */
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 #if !defined(MBEDTLS_CONFIG_FILE)
 #include "mbedtls/config.h"
@@ -43,6 +46,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+
 
 #if ( defined(__ARMCC_VERSION) || defined(_MSC_VER) ) && \
     !defined(inline) && !defined(__cplusplus)
@@ -105,7 +109,18 @@ void mbedtls_debug_print_msg( const mbedtls_ssl_context *ssl, int level,
         str[ret + 1] = '\0';
     }
 
+#ifdef _WIN32
+    #ifdef DEBUG
+    OutputDebugStringA(str);
+    OutputDebugStringA("\r\n");
+#else
     debug_send_line( ssl, level, file, line, str );
+#endif
+#else
+    debug_send_line(ssl, level, file, line, str);
+#endif
+
+
 }
 
 void mbedtls_debug_print_ret( const mbedtls_ssl_context *ssl, int level,
@@ -133,7 +148,17 @@ void mbedtls_debug_print_ret( const mbedtls_ssl_context *ssl, int level,
     mbedtls_snprintf( str, sizeof( str ), "%s() returned %d (-0x%04x)\n",
               text, ret, -ret );
 
+#ifdef _WIN32
+#ifdef DEBUG
+    OutputDebugStringA(str);
+    OutputDebugStringA("\r\n");
+#else
     debug_send_line( ssl, level, file, line, str );
+#endif
+#else
+    debug_send_line(ssl, level, file, line, str);
+#endif
+
 }
 
 void mbedtls_debug_print_buf( const mbedtls_ssl_context *ssl, int level,
@@ -154,8 +179,17 @@ void mbedtls_debug_print_buf( const mbedtls_ssl_context *ssl, int level,
 
     mbedtls_snprintf( str + idx, sizeof( str ) - idx, "dumping '%s' (%u bytes)\n",
               text, (unsigned int) len );
-
+#ifdef _WIN32
+#ifdef DEBUG
+    OutputDebugStringA(str);
+    OutputDebugStringA("\r\n");
+#else
     debug_send_line( ssl, level, file, line, str );
+#endif
+#else
+    debug_send_line(ssl, level, file, line, str);
+#endif
+
 
     idx = 0;
     memset( txt, 0, sizeof( txt ) );
